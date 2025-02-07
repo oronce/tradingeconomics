@@ -12,7 +12,7 @@ function getDateRange() {
     };
 }
 
-// Example usage
-let dateRange = getDateRange();
-console.log("Start Date:", dateRange.startDate);
-console.log("End Date:", dateRange.endDate);
+// // Example usage
+// let dateRange = getDateRange();
+// console.log("Start Date:", dateRange.startDate);
+// console.log("End Date:", dateRange.endDate);
