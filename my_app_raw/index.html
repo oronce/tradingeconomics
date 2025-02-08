@@ -27,6 +27,9 @@
     </style>
   </head>
   <body>
+    <div id="errorMessage" class="alert alert-danger text-center d-none" style="position: fixed; top: 10px; left: 50%; transform: translateX(-50%); z-index: 1050;">
+    </div>
+    
     <nav class="navbar navbar-light bg-light">
       <div class="container">
         <a class="navbar-brand fw-bold">Trading Economics</a>
@@ -57,18 +60,22 @@
               </div>
             </li>
             <div id="CompanyList" >
-              <li><a class="dropdown-item" href="#">Category 1</a></li>
-              <li><a class="dropdown-item" href="#">Category 2 ex. long</a></li>
-              <li><a class="dropdown-item" href="#">Category 3</a></li>
-              <li><a class="dropdown-item" href="#">Category 4 ex. long</a></li>
-              <li><a class="dropdown-item" href="#">Category 5</a></li>
-              <li><a class="dropdown-item" href="#">Category 6</a></li>
+
             </div>
           </ul>
         </div>
       </div>
 
-      <div class="card shadow-lg p-4">
+      <div id="chartContainer" class="card shadow-lg p-4">
+        <!-- Loading Spinner -->
+        <div id="loadingSpinner" class="position-absolute top-50 start-50 translate-middle d-none">
+          <div class="spinner-border text-primary" role="status">
+              <span class="visually-hidden">Loading...</span>
+          </div>
+          <p id="loadingMessage">Loading...</p>
+        </div>
+
+        <!-- Chart -->
         <canvas id="financialChart"></canvas>
       </div>
 
