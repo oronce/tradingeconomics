@@ -59,16 +59,24 @@
                 let companyList = $("#CompanyList");
                 companyList.empty();
 
+                //to remove duplicates
+                let uniqueSymbols = new Set();
+
                 data.forEach(company => {
-                    companyList.append(
-                        `<li><a class="dropdown-item company-item" href="#" data-symbol="${company.Symbol}">${company.Symbol} - ${company.Name}</a></li>`
-                    );
+                    if (!uniqueSymbols.has(company.Symbol)) { // Check if symbol already exists
+                        uniqueSymbols.add(company.Symbol); // Mark symbol as added
+                        
+                        companyList.append(
+                            `<li><a class="dropdown-item company-item" href="#" data-symbol="${company.Symbol}">${company.Symbol} - ${company.Name}</a></li>`
+                        );
+                    }
                 });
 
-                if (data.length > 0) {
-                    // Fetch dividends for the first company by default
-                    fetchDividends(data[0].Symbol);
+                if (uniqueSymbols.size > 0) {
+                    // Fetch dividends for the first unique company by default
+                    fetchDividends([...uniqueSymbols][0]);
                 }
+
 
             }).fail(function () {
                 showError("Something went Wrong fetching available companies  , Try again later" )
