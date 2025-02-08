@@ -15,6 +15,8 @@
         let { startDate, endDate } = getDateRange(yearsBack = 1);
         let chartContainer = $("#chartContainer");
 
+        //UTILS FUNCS
+
         function showError(message) {
             let errorBox = $("#errorMessage");
             errorBox.text(message).removeClass("d-none");
@@ -32,7 +34,22 @@
         function hideLoading() {
             $("#loadingSpinner").addClass("d-none"); 
         }
+
+        function getDateRange(yearsBack) {
+            let endDate = new Date(); // Today
+            let startDate = new Date();
+            startDate.setFullYear(endDate.getFullYear() - yearsBack); // One year back
         
+            // Format to YYYY-MM-DD
+            let formatDate = (date) => date.toISOString().split("T")[0];
+        
+            return {
+                startDate: formatDate(startDate),
+                endDate: formatDate(endDate)
+            };
+        }
+        
+        //API FUNCS
 
         function fetchCompanies() {
             showLoading("Loading Companies Data, please wait...")
@@ -60,6 +77,33 @@
             });
         }
 
+        function fetchDividends(companySymbol) {    
+            let { startDate, endDate } = getDateRange(yearsBack = 10);
+            showLoading("Loading data, please wait...");
+
+            $.getJSON(`${BASE_URL}/dividends/symbol/${companySymbol}?d1=${startDate}&d2=${endDate}&c=${CONFIG.API_KEY}`, function (data) {
+
+                
+                if (!data || data.length === 0) {
+                    showError("No dividend data available for " + companySymbol)
+                    updateChart([], [],'','',false); // Clear chart if no data
+                    return;
+                }
+
+                let dates = data.map(item => item.DatePayment);
+                let dividends = data.map(item => item.Actual);
+                let currency = data[0].Currency;
+
+                updateChart(dates, dividends,companySymbol , currency,istitleDisplay=true);
+
+            }).fail(function () {
+                showError("Something went Wrong  , Try again later" )
+            }).always(function () {
+                hideLoading()
+            });
+        }
+
+        //CHARTS 
         let ctx = document.getElementById("financialChart").getContext("2d");
 
         // Initialize Chart
@@ -104,31 +148,7 @@
             }
         });
 
-        function fetchDividends(companySymbol) {    
-            let { startDate, endDate } = getDateRange(yearsBack = 10);
-            showLoading("Loading data, please wait...");
-
-            $.getJSON(`${BASE_URL}/dividends/symbol/${companySymbol}?d1=${startDate}&d2=${endDate}&c=${CONFIG.API_KEY}`, function (data) {
-
-                
-                if (!data || data.length === 0) {
-                    showError("No dividend data available for " + companySymbol)
-                    updateChart([], [],'','',false); // Clear chart if no data
-                    return;
-                }
-
-                let dates = data.map(item => item.DatePayment);
-                let dividends = data.map(item => item.Actual);
-                let currency = data[0].Currency;
-
-                updateChart(dates, dividends,companySymbol , currency,istitleDisplay=true);
-
-            }).fail(function () {
-                showError("Something went Wrong  , Try again later" )
-            }).always(function () {
-                hideLoading()
-            });
-        }
+        
 
         function updateChart(labels, values,companySymbol, currency , istitleDisplay=false) {
             financialChart.data.labels = labels;
@@ -141,6 +161,8 @@
 
             financialChart.update();
         }
+
+        //LISTENERS
 
         // Toggle company list on/off
         $(document).on("click", ".company-item", function () {
