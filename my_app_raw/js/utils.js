@@ -1,7 +1,7 @@
-function getDateRange() {
+function getDateRange(yearsBack) {
     let endDate = new Date(); // Today
     let startDate = new Date();
-    startDate.setFullYear(endDate.getFullYear() - 10); // One year back
+    startDate.setFullYear(endDate.getFullYear() - yearsBack); // One year back
 
     // Format to YYYY-MM-DD
     let formatDate = (date) => date.toISOString().split("T")[0];

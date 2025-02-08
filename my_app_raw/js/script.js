@@ -1,5 +1,18 @@
     $(document).ready(function () {
-        let { startDate, endDate } = getDateRange();
+
+        const BASE_URL = "https://api.tradingeconomics.com"
+
+        //stop execution if no config file
+        if (typeof CONFIG === "undefined") {
+            alert("Config file  is missing. Please check your configuration.");
+            return; 
+        }else if (!CONFIG.API_KEY){
+            alert("API key is required. Please check your configuration.");
+            return;
+        }
+    
+
+        let { startDate, endDate } = getDateRange(yearsBack = 1);
         let chartContainer = $("#chartContainer");
 
         function showError(message) {
@@ -12,19 +25,20 @@
         }
 
         function showLoading(message = "Loading data, please wait...") {
-            $("#loadingMessage").text(message); // Set the custom message
-            $("#loadingSpinner").removeClass("d-none"); // Show loading overlay
+            $("#loadingMessage").text(message); 
+            $("#loadingSpinner").removeClass("d-none"); 
         }
         
         function hideLoading() {
-            $("#loadingSpinner").addClass("d-none"); // Hide loading overlay
+            $("#loadingSpinner").addClass("d-none"); 
         }
         
 
         function fetchCompanies() {
             showLoading("Loading Companies Data, please wait...")
 
-            $.getJSON(`${CONFIG.BASE_URL}/financials/companies?c=${CONFIG.API_KEY}`, function (data) {
+            $.getJSON(`${BASE_URL}/dividends/?d1=${startDate}&d2=${endDate}&c=${CONFIG.API_KEY}`, function (data) {
+                
                 let companyList = $("#CompanyList");
                 companyList.empty();
 
@@ -35,13 +49,13 @@
                 });
 
                 if (data.length > 0) {
-                    fetchDividends("AAPL:US");
+                    // Fetch dividends for the first company by default
+                    fetchDividends(data[0].Symbol);
                 }
 
             }).fail(function () {
                 showError("Something went Wrong fetching available companies  , Try again later" )
             }).always(function () {
-                // Hide loading spinner after fetching is complete (success or fail)
                 hideLoading()
             });
         }
@@ -52,10 +66,10 @@
         let financialChart = new Chart(ctx, {
             type: "line",
             data: {
-                labels: [], // Dates
+                labels: [], 
                 datasets: [{
                     label: "Dividends",
-                    data: [], // Dividend values
+                    data: [], 
                     borderColor: "#007bff",
                     backgroundColor: "rgba(0, 123, 255, 0.2)",
                     fill: true
@@ -67,7 +81,7 @@
                     legend: { display: true },
                     title: {
                         display: false,
-                        text: "Dividend History", // Chart title
+                        text: "Dividend History", 
                         font: { size: 18 }
                     }
                 },
@@ -75,14 +89,14 @@
                     x: {
                         title: {
                             display: true,
-                            text: "Payment Date", // X-axis title
+                            text: "Payment Date", 
                             font: { size: 14 }
                         }
                     },
                     y: {
                         title: {
                             display: true,
-                            text: "Dividend Amount", // Y-axis title
+                            text: "Dividend Amount", 
                             font: { size: 14 }
                         }
                     }
@@ -90,20 +104,16 @@
             }
         });
 
-        //Function to Fetch & Update Dividends
         function fetchDividends(companySymbol) {    
-            console.log("Fetching Dividends for " + companySymbol);
+            let { startDate, endDate } = getDateRange(yearsBack = 10);
             showLoading("Loading data, please wait...");
 
-            $.getJSON(`${CONFIG.BASE_URL}/dividends/symbol/${companySymbol}?d1=${startDate}&d2=${endDate}&c=${CONFIG.API_KEY}`, function (data) {
-                console.log("data fetch sucessfully", data);
+            $.getJSON(`${BASE_URL}/dividends/symbol/${companySymbol}?d1=${startDate}&d2=${endDate}&c=${CONFIG.API_KEY}`, function (data) {
 
                 
                 if (!data || data.length === 0) {
                     showError("No dividend data available for " + companySymbol)
-                    //alert("No dividend data available for this company.");
                     updateChart([], [],'','',false); // Clear chart if no data
-                    //chartContainer.hide();
                     return;
                 }
 
@@ -114,15 +124,12 @@
                 updateChart(dates, dividends,companySymbol , currency,istitleDisplay=true);
 
             }).fail(function () {
-                console.log("Error fetching dividend data.");
                 showError("Something went Wrong  , Try again later" )
             }).always(function () {
-                // Hide loading spinner after fetching is complete (success or fail)
                 hideLoading()
             });
         }
 
-        // Function to Update Chart
         function updateChart(labels, values,companySymbol, currency , istitleDisplay=false) {
             financialChart.data.labels = labels;
             financialChart.data.datasets[0].data = values;
@@ -135,14 +142,15 @@
             financialChart.update();
         }
 
+        // Toggle company list on/off
         $(document).on("click", ".company-item", function () {
             let selectedCompany = $(this).text();
             let selectedSymbol = $(this).data("symbol");
         
-            $("#selectedCompany").text(selectedCompany); // Update button text
+            $("#selectedCompany").text(selectedCompany); 
             $("#companySearch").val(''); 
             $(".company-item").toggle(true);
-            fetchDividends(selectedSymbol); // Load dividends for selected company
+            fetchDividends(selectedSymbol); 
         });
 
         //implement the search feature
