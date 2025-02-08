@@ -1,6 +1,7 @@
 # TE Dividend Visualization
 
 A web-based dashboard that visualizes dividend data from companies worldwide using the Trading Economics API.
+![image alt](https://github.com/oronce/tradingeconomics/blob/b0bf9fb85e33bd1ef2d8ee58a0e8fb2281777a26/Screenshot%20from%202025-02-08%2013-53-43.png)
 
 ## Overview
 This application provides a simple, intuitive interface to explore and analyze dividend payments across global companies. Users can search for specific companies and view their historical dividend data through interactive charts.
