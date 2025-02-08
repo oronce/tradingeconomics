@@ -22,7 +22,8 @@
         
 
         function fetchCompanies() {
-            showLoading("Loading Companies Data, please wait...");
+            showLoading("Loading Companies Data, please wait...")
+
             $.getJSON(`${CONFIG.BASE_URL}/financials/companies?c=${CONFIG.API_KEY}`, function (data) {
                 let companyList = $("#CompanyList");
                 companyList.empty();
@@ -38,7 +39,7 @@
                 }
 
             }).fail(function () {
-                alert("Error fetching company data.");
+                showError("Something went Wrong fetching available companies  , Try again later" )
             }).always(function () {
                 // Hide loading spinner after fetching is complete (success or fail)
                 hideLoading()
@@ -63,7 +64,28 @@
             options: {
                 responsive: true,
                 plugins: {
-                    legend: { display: true }
+                    legend: { display: true },
+                    title: {
+                        display: false,
+                        text: "Dividend History", // Chart title
+                        font: { size: 18 }
+                    }
+                },
+                scales: {
+                    x: {
+                        title: {
+                            display: true,
+                            text: "Payment Date", // X-axis title
+                            font: { size: 14 }
+                        }
+                    },
+                    y: {
+                        title: {
+                            display: true,
+                            text: "Dividend Amount", // Y-axis title
+                            font: { size: 14 }
+                        }
+                    }
                 }
             }
         });
@@ -80,15 +102,16 @@
                 if (!data || data.length === 0) {
                     showError("No dividend data available for " + companySymbol)
                     //alert("No dividend data available for this company.");
-                    updateChart([], []); // Clear chart if no data
+                    updateChart([], [],'','',false); // Clear chart if no data
                     //chartContainer.hide();
                     return;
                 }
 
                 let dates = data.map(item => item.DatePayment);
                 let dividends = data.map(item => item.Actual);
+                let currency = data[0].Currency;
 
-                updateChart(dates, dividends);
+                updateChart(dates, dividends,companySymbol , currency,istitleDisplay=true);
 
             }).fail(function () {
                 console.log("Error fetching dividend data.");
@@ -100,9 +123,15 @@
         }
 
         // Function to Update Chart
-        function updateChart(labels, values) {
+        function updateChart(labels, values,companySymbol, currency , istitleDisplay=false) {
             financialChart.data.labels = labels;
             financialChart.data.datasets[0].data = values;
+
+            financialChart.options.plugins.title.text = `Dividend History - ${companySymbol}`;
+            financialChart.options.plugins.title.display = istitleDisplay;
+
+            financialChart.options.scales.y.title.text = `Dividend Value (${currency})`;
+
             financialChart.update();
         }
 
@@ -111,6 +140,8 @@
             let selectedSymbol = $(this).data("symbol");
         
             $("#selectedCompany").text(selectedCompany); // Update button text
+            $("#companySearch").val(''); 
+            $(".company-item").toggle(true);
             fetchDividends(selectedSymbol); // Load dividends for selected company
         });
 
