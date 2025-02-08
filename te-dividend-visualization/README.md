@@ -19,5 +19,4 @@ Example configuration:
 ```javascript
 const CONFIG = {
     API_KEY: "your_api_key_here",
-    BASE_URL: "https://api.tradingeconomics.com/v1"
 };
